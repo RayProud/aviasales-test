@@ -1,6 +1,63 @@
 .layovers {
-  grid-area: layovers;
+  display: flex;
+  padding: 20px 0;
+  flex-direction: column;
+  align-items: start;
   box-shadow: 0px 2px 8px rgba(0, 0, 0, .1);
   border-radius: 5px;
   background: #fff;
+  color: #4a4a4a;
+  text-transform: uppercase;
+}
+
+.layovers__heading {
+  margin: 0 0 20px;
+  padding: 0 0 0 20px;
+  font: 600 12px/1 'Open Sans', sans-serif;
+  letter-spacing: 0.5px;
+}
+
+.layovers__list {
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.layovers__item {
+
+}
+
+.layovers__item:hover {
+  background: #f1fcff;
+}
+
+.layovers__item-checkbox {
+  display: none;
+}
+.layovers__item-checkbox:checked + .layovers__item-label:before {
+  background-repeat: no-repeat;
+  background-position: center;
+  background-image: url(data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTIiIGhlaWdodD0iOCIgdmlld0JveD0iMCAwIDEyIDgiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHBhdGggZD0iTTQuMjg1NzEgOEwwIDQuMTYxMjNMMS4yMDg1NyAzLjA3ODdMNC4yODU3MSA1LjgyNzI2TDEwLjc5MTQgMEwxMiAxLjA5MDIxTDQuMjg1NzEgOFoiIGZpbGw9IiMyMTk2RjMiLz48L3N2Zz4=);
+}
+
+.layovers__item-label {
+  display: flex;
+  align-items: center;
+  padding: 0 20px;
+  height: 40px;
+  line-height: 40px;
+  cursor: pointer;
+  font: 13px/20px 'Open Sans', sans-serif;
+  user-select: none;
+}
+
+.layovers__item-label:before {
+  content: '';
+  box-sizing: border-box;
+  margin: 0 10px 0 0;
+  width: 20px;
+  height: 20px;
+  border: 1px solid #9abbce;
+  border-radius: 2px;
 }

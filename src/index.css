@@ -29,7 +29,7 @@ code {
   height: 100%;
   grid-template-areas: "header header"
                        "layovers tickets-wrap";
-  grid-template-rows: 160px auto;
+  grid-template-rows: 160px minmax(min-content, max-content);
   grid-template-columns: 1fr minmax(502px, 2fr);
   grid-gap: 0 20px;
 }
