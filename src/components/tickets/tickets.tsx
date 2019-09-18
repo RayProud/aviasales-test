@@ -16,7 +16,7 @@ const Tickets: React.FC = () => {
                 </label>
             </div>
             <ul className="tickets__list">
-                <Ticket />
+                {Array(5).fill(<Ticket />)}
             </ul>
         </main>
     );

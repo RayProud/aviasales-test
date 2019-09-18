@@ -3,10 +3,6 @@
   --text-color: #4a4a4a;
 }
 
-html {
-  height: 100%;
-}
-
 body {
   height: 100%;
   margin: 0;
@@ -17,11 +13,6 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
-    monospace;
-}
-
 #root {
   height: 100%;
   background: #f3f7fa;
@@ -30,6 +21,7 @@ code {
 .app {
   display: grid;
   margin: 0 auto;
+  padding: 0 0 20px;
   width: 754px;
   height: 100%;
   grid-template-areas: "header header"

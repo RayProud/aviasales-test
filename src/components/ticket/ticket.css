@@ -1,3 +1,53 @@
 .ticket {
+    margin: 0 0 20px;
+    padding: 20px;
+    background: #fff;
+    box-shadow: 0px 2px 8px rgba(0, 0, 0, .1);
+    border-radius: 5px;
+}
 
+.ticket:last-of-type {
+    margin: 0;
+}
+
+.ticket__first-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: 0 0 20px;
+}
+
+.ticket__price {
+    margin: 0;
+    font: 600 24px/1 'Open Sans', sans-serif;
+    color: var(--primal-blue);
+}
+
+.ticket__logo {
+    width: 110px;
+    height: auto;
+    max-height: 36px;
+}
+
+.ticket__segment {
+    display: flex;
+    justify-content: space-between;
+    margin: 0;
+}
+
+.ticket__segment:not(:first-of-type) {
+    margin: 10px 0 0;
+}
+
+.ticket__details-heading {
+    font: 600 12px/18px 'Open Sans', sans-serif;
+    letter-spacing: .5px;
+    text-transform: uppercase;
+    color: #a0b0b9;
+}
+
+.ticket__details-value {
+    margin: 0;
+    font: 600 14px/21px 'Open Sans', sans-serif;
+    color: var(--text-color);
 }
