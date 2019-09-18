@@ -6,7 +6,7 @@
   box-shadow: 0px 2px 8px rgba(0, 0, 0, .1);
   border-radius: 5px;
   background: #fff;
-  color: #4a4a4a;
+  color: var(--text-color);
   text-transform: uppercase;
 }
 
@@ -39,6 +39,7 @@
   background-repeat: no-repeat;
   background-position: center;
   background-image: url(data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTIiIGhlaWdodD0iOCIgdmlld0JveD0iMCAwIDEyIDgiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHBhdGggZD0iTTQuMjg1NzEgOEwwIDQuMTYxMjNMMS4yMDg1NyAzLjA3ODdMNC4yODU3MSA1LjgyNzI2TDEwLjc5MTQgMEwxMiAxLjA5MDIxTDQuMjg1NzEgOFoiIGZpbGw9IiMyMTk2RjMiLz48L3N2Zz4=);
+  border-color: var(--primal-blue);
 }
 
 .layovers__item-label {

@@ -1,3 +1,39 @@
 .tickets {
 
 }
+
+.tickets__filter {
+    display: flex;
+}
+
+.tickets__filter-radio {
+    display: none;
+}
+
+.tickets__filter-label {
+    box-sizing: border-box;
+    width: 50%;
+    height: 50px;
+    font: 600 12px/50px 'Open Sans', sans-serif;
+    text-transform: uppercase;
+    text-align: center;
+    letter-spacing: .5px;
+    background: #fff;
+    border: 1px solid #dfe5ec;
+    color: var(--text-color);
+    cursor: pointer;
+}
+
+.tickets__filter-label:first-of-type {
+    border-radius: 5px 0 0 5px;
+}
+
+.tickets__filter-label:last-of-type {
+    border-radius: 0 5px 5px 0;
+}
+
+.tickets__filter-radio:checked + .tickets__filter-label {
+    color: #fff;
+    background: var(--primal-blue);
+    border-color: var(--primal-blue);
+}
