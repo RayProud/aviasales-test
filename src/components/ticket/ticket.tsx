@@ -4,10 +4,8 @@ import './ticket.css';
 const Ticket: React.FC = () => {
     return (
         <li className="ticket">
-            <div className="ticket__first-row">
-                <p className="ticket__price">13 400 Р</p>
-                <img className="ticket__logo" src="https://pics.avs.io/99/36/SU.png" alt="TK logo" srcSet="//pics.avs.io/99/36/TK@2x.png 2x" />
-            </div>
+            <p className="ticket__price">13 400 Р</p>
+            <img className="ticket__logo" src="https://pics.avs.io/99/36/SU.png" alt="TK logo" srcSet="//pics.avs.io/99/36/TK@2x.png 2x" />
             <dl className="ticket__segment">
                 <div className="ticket__way">
                     <dt className="ticket__details-heading">MOW – HKT</dt>
