@@ -27,6 +27,12 @@
     cursor: pointer;
 }
 
+.tickets__filter-label:hover {
+    background: #e5f9ff;
+    border-color: var(--primal-blue);
+    color: var(--primal-blue);
+}
+
 .tickets__filter-label:first-of-type {
     border-radius: 5px 0 0 5px;
 }
