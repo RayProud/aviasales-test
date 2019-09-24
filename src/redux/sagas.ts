@@ -24,6 +24,25 @@ function parseJSON(response: Response) {
     return response.json();
 }
 
+
+/**
+ * В стандарте fetch не предусмотрен таймаут запроса, эмулируем его через race-condition
+ * @param request исполняемый запрос
+ * @param timeout количество мс отведенное на исполнение запроса
+ * @throws Выбрасывает исключение если запрос не былвыполнен за timeout
+ */
+function fetchTimeout(request: ReturnType<typeof fetch>, timeout = 2000) {
+    return Promise.race([
+        request,
+        new Promise<never>((_, reject) =>
+        setTimeout(() => {
+            reject(new Error("Request timeout"));
+        }, timeout)
+        )
+    ]);
+}
+
+// добавить таймаут и добавить в проверке статуса await response.text() для бажного хрома
 const request = <T>(url: string): Promise<T> => {
     function fetchWithErrors(url: string, repeats: number = 5): Promise<T> {
         let retries = repeats;
@@ -51,7 +70,7 @@ function* rootSaga() {
 
     try {
         // Как бы сюда типы просунуть? 🤔
-        const searchResponse = yield request<SearchResponse>(SEARCH_URL);
+        const searchResponse: SearchResponse = yield request<SearchResponse>(SEARCH_URL);
         const { searchId } = searchResponse;
 
         let haveTickets = true;
@@ -59,7 +78,7 @@ function* rootSaga() {
 
         // начать крутить прелоадер над билетами
         while (haveTickets) {
-            const ticketsResponse = yield request<TicketsResponse>(`${TICKETS_URL}?searchId=${searchId}`);
+            const ticketsResponse: TicketsResponse = yield request(`${TICKETS_URL}?searchId=${searchId}`);
             const { tickets, stop } = ticketsResponse;
             if (count === 0) {
                 // можно положить сперва первую партию сразу в стор, чтобы отрендерить что-нибудь,

@@ -5,9 +5,13 @@ import defaultReducer from './reducers';
 import rootSaga from './sagas';
 
 const sagaMiddleware = createSagaMiddleware();
-export default createStore(
+const store = createStore(
     defaultReducer,
     composeWithDevTools(applyMiddleware(sagaMiddleware))
 );
 
-sagaMiddleware.run(rootSaga);
+export type AppState = ReturnType<typeof defaultReducer>
+
+sagaMiddleware.run(rootSaga as any);
+
+export default store;

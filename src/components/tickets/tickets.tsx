@@ -1,8 +1,14 @@
 import React from 'react';
 import './tickets.css';
+import { Ticket as ITicket } from '../../redux/types';
 import Ticket from '../ticket/ticket';
 
-const Tickets: React.FC = () => {
+interface Props {
+    tickets: ITicket[]
+}
+
+const Tickets: React.FC<Props> = (props: Props) => {
+    const { tickets } = props;
     return (
         <main className="tickets">
             <div className="tickets__filter">
@@ -15,8 +21,9 @@ const Tickets: React.FC = () => {
                     Самый быстрый
                 </label>
             </div>
+
             <ul className="tickets__list">
-                {Array(5).fill(<Ticket />)}
+                {tickets.slice(0, 10).map(ticket => <Ticket ticket={ticket} />)}
             </ul>
         </main>
     );

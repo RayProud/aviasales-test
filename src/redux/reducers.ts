@@ -1,6 +1,12 @@
 import { startSearching, ticketsResponseSuccess } from './actions';
+import { Ticket } from './types';
 
-const initialState = {};
+export interface globalState {
+    tickets?: Ticket[]
+}
+
+const initialState: globalState = {};
+
 type action =
     ReturnType<typeof startSearching>
     | ReturnType<typeof ticketsResponseSuccess>;
