@@ -23,7 +23,7 @@ const Tickets: React.FC<Props> = (props: Props) => {
             </div>
 
             <ul className="tickets__list">
-                {tickets.slice(0, 10).map(ticket => <Ticket ticket={ticket} />)}
+                {tickets.slice(0, 10).map((ticket, i) => <Ticket key={`${i}-${ticket.carrier}-${ticket.segments[0].destination}-${ticket.segments[0].date}-${ticket.segments[1].destination}-${ticket.segments[1].date}`} ticket={ticket} />)}
             </ul>
         </main>
     );
