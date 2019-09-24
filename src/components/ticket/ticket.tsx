@@ -1,6 +1,6 @@
 import React from 'react';
 import { DateTime } from 'luxon';
-import { Ticket as ITicket } from '../../redux/types';
+import { Ticket as ITicket } from '../../redux/tickets/types';
 import './ticket.css';
 
 interface Props {

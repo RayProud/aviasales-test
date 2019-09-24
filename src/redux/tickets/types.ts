@@ -1,6 +1,18 @@
+import { startSearching, ticketsResponseSuccess } from './actions';
+
+export interface State {
+    tickets?: Ticket[]
+}
+
+export type StartSearching = ReturnType<typeof startSearching>;
+
 export interface SearchResponse {
     searchId: string
 };
+
+export type ActionsTypes =
+    ReturnType<typeof startSearching>
+    | ReturnType<typeof ticketsResponseSuccess>;
 
 export interface Ticket {
     // Цена в рублях

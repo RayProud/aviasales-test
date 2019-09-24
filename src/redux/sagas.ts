@@ -1,11 +1,11 @@
 import { put, take } from 'redux-saga/effects';
-import { StartSearching, ticketsResponseSuccess } from './actions';
-import { SearchResponse, Ticket, TicketsResponse } from './types';
+import actions from './actionsCombine';
+import { SearchResponse, TicketsResponse, StartSearching } from './tickets/types';
+
+const { ticketsResponseSuccess } = actions;
 
 const SEARCH_URL = 'https://front-test.beta.aviasales.ru/search';
 const TICKETS_URL = 'https://front-test.beta.aviasales.ru/tickets';
-
-
 
 // дело в том, что для fetch'а любой состоявшийся запрос считается успешным
 // ошибки для него — это CORS и отсуствие сети — они будут обработаны уже в .catch
@@ -23,7 +23,6 @@ function checkStatus(response: Response) {
 function parseJSON(response: Response) {
     return response.json();
 }
-
 
 /**
  * В стандарте fetch не предусмотрен таймаут запроса, эмулируем его через race-condition
