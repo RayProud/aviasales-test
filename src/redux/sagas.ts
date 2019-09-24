@@ -1,11 +1,17 @@
-import { put, take } from 'redux-saga/effects';
+import { put, take, select, all, call, takeEvery } from 'redux-saga/effects';
+import { eventChannel } from 'redux-saga';
 import actions from './actionsCombine';
 import { SearchResponse, TicketsResponse, StartSearching } from './tickets/types';
+import { AppState } from './store';
 
 const { ticketsResponseSuccess } = actions;
 
+const getFilters = (state: AppState) => state.filters;
+
 const SEARCH_URL = 'https://front-test.beta.aviasales.ru/search';
 const TICKETS_URL = 'https://front-test.beta.aviasales.ru/tickets';
+
+const myWorker = new Worker("worker.js");
 
 // дело в том, что для fetch'а любой состоявшийся запрос считается успешным
 // ошибки для него — это CORS и отсуствие сети — они будут обработаны уже в .catch
@@ -63,53 +69,73 @@ const request = <T>(url: string): Promise<T> => {
     return fetchWithErrors(url);
 }
 
-function* rootSaga() {
+function createWorkerChannel() {
+    return eventChannel(emit => {
+        const pingHandler = (event: MessageEvent) => {
+          // puts event payload into the channel
+          // this allows a Saga to take this payload from the returned channel
+          const result = event.data;
+          emit(result);
+        }
+
+        myWorker.onmessage = pingHandler;
+
+        // the subscriber must return an unsubscribe function
+        // this will be invoked when the saga calls `channel.close` method
+        const unsubscribe = () => {
+          myWorker.terminate();
+        };
+
+        return unsubscribe
+      })
+}
+
+function* getTickets() {
+    const workerChannel = yield call(createWorkerChannel);
+
+    while (true) {
+        const payload = yield take(workerChannel);
+        console.log('payload', payload);
+        yield put(ticketsResponseSuccess(payload));
+    }
+}
+
+// сана на прослушки изменений фильтров, чтобы делать postMessage с другими параметрами
+
+function* listenFiltersChange() {
+    while (true) {
+        yield take(['CHANGE_MOST_FILTER', 'CHANGE_LAYOVER_FILTER']);
+        const filters = yield select(getFilters)
+
+        myWorker.postMessage({
+            action: 'sort',
+            filters
+        });
+    }
+}
+
+
+function* start() {
   while (true) {
     yield take<StartSearching>('START_SEARCHING');
 
     try {
-        const searchResponse: SearchResponse = yield request<SearchResponse>(SEARCH_URL);
-        const { searchId } = searchResponse;
+        const filters = yield select(getFilters)
 
-        let haveTickets = true;
-        let count = 0;
-        const wholeBunchOfTickets = [];
-
-        // начать крутить прелоадер над билетами
-        while (haveTickets) {
-            // а ещё кажется, что все эти запросы, даже первый, может на себя взять воркер,
-            // postMessage'ем слать наверх по сортированных 10 штук
-            const ticketsResponse: TicketsResponse = yield request(`${TICKETS_URL}?searchId=${searchId}`);
-            const { tickets, stop } = ticketsResponse;
-
-            wholeBunchOfTickets.push(...tickets);
-
-            if (count === 0) {
-                // можно положить сперва первую партию сразу в стор, чтобы отрендерить что-нибудь,
-                // при этом каждую партию отправлять в webworker
-                // каждые N секунд получать сообщение (или запрашивать) от webworker'а и подпушивать результаты
-                // всё это время, пока нет stop: true, крутить предлоадер
-                const sorted = tickets.sort((a, b) => a.price - b.price);
-                yield put(ticketsResponseSuccess(sorted));
-            }
-            count++;
-            // console.log(tickets, stop);
-
-            if (stop) {
-                // выключить прелоадер
-                haveTickets = false;
-            }
-        }
-
-        // вынести в веб воркер
-        const sortedTickets = wholeBunchOfTickets.sort((a, b) => a.price - b.price);
-
-        yield put(ticketsResponseSuccess(sortedTickets));
-
+        myWorker.postMessage({
+            action: 'getTickets',
+            filters
+        });
     } catch(e) {
         console.log('try error', e);
     }
   }
 }
 
-export default rootSaga;
+export default function *rootSaga() {
+    yield all([
+        start(),
+        getTickets(),
+        listenFiltersChange()
+    ]);
+}
