@@ -68,24 +68,29 @@ function* rootSaga() {
     yield take<StartSearching>('START_SEARCHING');
 
     try {
-        // Как бы сюда типы просунуть? 🤔
         const searchResponse: SearchResponse = yield request<SearchResponse>(SEARCH_URL);
         const { searchId } = searchResponse;
 
         let haveTickets = true;
         let count = 0;
+        const wholeBunchOfTickets = [];
 
         // начать крутить прелоадер над билетами
         while (haveTickets) {
+            // а ещё кажется, что все эти запросы, даже первый, может на себя взять воркер,
+            // postMessage'ем слать наверх по сортированных 10 штук
             const ticketsResponse: TicketsResponse = yield request(`${TICKETS_URL}?searchId=${searchId}`);
             const { tickets, stop } = ticketsResponse;
+
+            wholeBunchOfTickets.push(...tickets);
+
             if (count === 0) {
                 // можно положить сперва первую партию сразу в стор, чтобы отрендерить что-нибудь,
                 // при этом каждую партию отправлять в webworker
                 // каждые N секунд получать сообщение (или запрашивать) от webworker'а и подпушивать результаты
                 // всё это время, пока нет stop: true, крутить предлоадер
-                console.log('tickets', tickets);
-                yield put(ticketsResponseSuccess(tickets));
+                const sorted = tickets.sort((a, b) => a.price - b.price);
+                yield put(ticketsResponseSuccess(sorted));
             }
             count++;
             // console.log(tickets, stop);
@@ -95,6 +100,11 @@ function* rootSaga() {
                 haveTickets = false;
             }
         }
+
+        // вынести в веб воркер
+        const sortedTickets = wholeBunchOfTickets.sort((a, b) => a.price - b.price);
+
+        yield put(ticketsResponseSuccess(sortedTickets));
 
     } catch(e) {
         console.log('try error', e);
