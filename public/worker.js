@@ -1,6 +1,7 @@
 "use strict";
 
 const TICKETS_URL = 'https://front-test.beta.aviasales.ru/tickets';
+const SEARCH_URL = 'https://front-test.beta.aviasales.ru/search';
 const allSortedTickets = [];
 
 function checkStatus(response) {
@@ -53,13 +54,19 @@ function filterLength(ticket, stops) {
 
 function filterSort(tickets, filters) {
     const { cheapest, layovers } = filters;
+    // кажется, надо поменять как-то более явно держать это в сторе
+    const fastest = !cheapest;
 
     const array = tickets.slice();
+
     // если layovers['stops-all'], то фильтруем по most
     // иначе сперва фильтруем по остановкам, потом уже по most (чтобы дофильтровать остатки предыдущей фильтрации)
+    if (layovers['stops-all']) {
+        if (cheapest) array.sort((a, b) => a.price - b.price);
+        if (fastest) array.sort((a, b) => (a.segments[0].duration + a.segments[1].duration) - (b.segments[0].duration + b.segments[1].duration));
 
-    // тут еще быстрый нужно считать — сейчас вмето этого дорогой
-    array.sort((a, b) => cheapest ? a.price - b.price : a.price - b.price);
+        return array;
+    }
 
     if (layovers['stops-all']) return array;
     // не больше трёх пересадок в фильтрах согласно дизайну и сайту (и здравому смыслу?)
@@ -69,8 +76,6 @@ function filterSort(tickets, filters) {
 async function startSearch(filters) {
     let haveTickets = true;
     let count = 0;
-
-    const SEARCH_URL = 'https://front-test.beta.aviasales.ru/search';
     // обложиться try-catch
     const searchResponse = await request(SEARCH_URL);
     const { searchId } = searchResponse;
@@ -81,8 +86,11 @@ async function startSearch(filters) {
 
         allSortedTickets.push(...tickets);
 
-        if (count === 0) {
-            const sorted = filterSort(tickets, filters);
+        // точно нужно показать данные как можно раньше, поэтому пушим первую сортированную партию
+        // на каждый 10й запрос допушиваем накопленные сортированные билеты, чтобы показать, что мы действительно делом заняты
+        // (правда, количество при этом растёт и каждая следующая сортировка будет занимать больше времени)
+        if (count === 0 || count % 10 === 0) {
+            const sorted = filterSort(allSortedTickets, filters);
             postMessage(sorted.slice(0, 10));
         }
         count++;
@@ -95,6 +103,9 @@ async function startSearch(filters) {
     // sort() мутирует
     const sortedTickets = allSortedTickets.sort((a, b) => a.price - b.price);
     postMessage(sortedTickets.slice(0, 10));
+
+    // вот тут бы ещё высылать данные о том, какие пересадки вообще доступны
+    // исползовать [].some()?
 }
 
 onmessage = async function(e) {
