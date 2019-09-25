@@ -1,36 +1,74 @@
 import React from 'react';
+import { AppState } from '../../redux/store';
+import { getPluralForm } from '../../helpers/formatters';
+import { LayoverFilter } from '../../redux/filters/types';
 import './layovers.css';
 
-const Layovers: React.FC = () => {
-    return (
-        <aside className="layovers">
-            <div className="layovers-inner">
-                <h2 className="layovers__heading">
-                    Количество пересадок
-                </h2>
-                <ul className="layovers__list">
-                    <li className="layovers__item">
-                        <input id="stops-all" type="checkbox" className="layovers__item-checkbox"/>
-                        <label htmlFor="stops-all" className="layovers__item-label">
-                            Все
-                        </label>
-                    </li>
-                    <li className="layovers__item">
-                        <input id="stops-0" type="checkbox" className="layovers__item-checkbox"/>
-                        <label htmlFor="stops-0" className="layovers__item-label">
-                            Без пересадок
-                        </label>
-                    </li>
-                    <li className="layovers__item">
-                        <input id="stops-1" type="checkbox" className="layovers__item-checkbox"/>
-                        <label htmlFor="stops-1" className="layovers__item-label">
-                            1 пересадка
-                        </label>
-                    </li>
-                </ul>
-            </div>
-        </aside>
-    );
+interface Props {
+    filters: AppState['filters']['layovers'];
+    onChange: (filters: LayoverFilter) => void;
+    onSwitchOn: () => void;
+    onSwitchOff: () => void;
+}
+
+class Layovers extends React.PureComponent<Props> {
+    onChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        const { onSwitchOn, onSwitchOff, onChange } = this.props;
+        const value = event.target.checked;
+        const id = event.target.id;
+
+        if (id === 'stopsall') {
+            return value ? onSwitchOn() : onSwitchOff();
+        }
+
+        onChange({
+            [id]: value
+        });
+    }
+
+    getLayoverTitle = (stopsKeyword: string) => {
+        const plural = new Intl.PluralRules('ru-RU');
+
+        switch (stopsKeyword) {
+            case 'all':
+                return 'Все';
+            case '0':
+                return 'Без пересадок'
+            default:
+                return `${stopsKeyword} ${getPluralForm(plural.select(Number(stopsKeyword)), 'пересадка', 'пересадки', 'пересадок', 'пересадки')}`;
+        }
+    }
+
+    render() {
+        const { filters } = this.props;
+
+        return (
+            <aside className="layovers">
+                <div className="layovers-inner">
+                    <h2 className="layovers__heading">
+                        Количество пересадок
+                    </h2>
+                    <ul className="layovers__list">
+                        {
+                            Object.keys(filters).map((filter, i) => {
+                                // 🤔 как-то неочевидно выходит деление на stops и all/0/1/2/3
+                                const stopsKeyword = filter.slice(5);
+
+                                return (
+                                    <li className="layovers__item" key={`${filter}-${i}`}>
+                                        <input onChange={this.onChange} checked={!!filters[filter]} id={filter} type="checkbox" className="layovers__item-checkbox"/>
+                                        <label htmlFor={filter} className="layovers__item-label">
+                                            {this.getLayoverTitle(stopsKeyword)}
+                                        </label>
+                                    </li>
+                                );
+                            })
+                        }
+                    </ul>
+                </div>
+            </aside>
+        );
+    }
 };
 
 export default Layovers;

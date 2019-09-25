@@ -1,6 +1,7 @@
 import React from 'react';
 import { DateTime } from 'luxon';
 import { Ticket as ITicket } from '../../redux/tickets/types';
+import { getPluralForm } from '../../helpers/formatters';
 import './ticket.css';
 
 interface Props {
@@ -20,18 +21,6 @@ const Ticket: React.FC<Props> = (props: Props) => {
     ).format(price);
 
     const plural = new Intl.PluralRules('ru-RU');
-    const getPluralForm = function(form: string, one: string, few: string, many: string, other: string) {
-        switch (form) {
-            case 'one':
-                return one;
-            case 'few':
-                return few;
-            case 'many':
-                return many;
-            default:
-                return other;
-        }
-    };
 
     return (
         <li className="ticket">

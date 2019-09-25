@@ -59,16 +59,16 @@ function filterSort(tickets, filters) {
 
     const array = tickets.slice();
 
-    // если layovers['stops-all'], то фильтруем по most
+    // если layovers['stopsall'], то фильтруем по most
     // иначе сперва фильтруем по остановкам, потом уже по most (чтобы дофильтровать остатки предыдущей фильтрации)
-    if (layovers['stops-all']) {
+    if (layovers['stopsall']) {
         if (cheapest) array.sort((a, b) => a.price - b.price);
         if (fastest) array.sort((a, b) => (a.segments[0].duration + a.segments[1].duration) - (b.segments[0].duration + b.segments[1].duration));
 
         return array;
     }
 
-    if (layovers['stops-all']) return array;
+    if (layovers['stopsall']) return array;
     // не больше трёх пересадок в фильтрах согласно дизайну и сайту (и здравому смыслу?)
     // как-то фильтровать по пришедшим пересадкам
 }
@@ -115,7 +115,7 @@ onmessage = async function(e) {
         await startSearch(filters);
     }
 
-    if (action === 'sort') {
+    if (action === 'sort' && allSortedTickets.length) {
         const sortedTickets = filterSort(allSortedTickets, filters);
         postMessage(sortedTickets.slice(0, 10));
     }

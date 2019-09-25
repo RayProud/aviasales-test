@@ -1,4 +1,4 @@
-import { Ticket, State, ActionsTypes } from './types';
+import { State, ActionsTypes } from './types';
 
 const initialState: State = {};
 

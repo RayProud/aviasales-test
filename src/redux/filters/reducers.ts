@@ -1,11 +1,21 @@
-import { State, ActionsTypes } from './types';
+import { State, ActionsTypes, LayoverFilter } from './types';
 
 const initialState: State = {
     layovers: {
-        'stops-all': true
+        'stopsall': true,
+        'stops0': true,
+        'stops1': true,
+        'stops2': true
     },
     cheapest: true
 };
+
+function changeAllLayovers(prevLayovers: LayoverFilter, state: boolean) {
+    return Object.keys(prevLayovers).reduce((prev: LayoverFilter, key) => {
+        prev[key] = state;
+        return prev;
+    }, {})
+}
 
 export function filtersReducer(
     state = initialState,
@@ -15,7 +25,10 @@ export function filtersReducer(
         case 'CHANGE_LAYOVER_FILTER': {
             return {
                 ...state,
-                layovers: action.layovers
+                layovers: {
+                    ...state.layovers,
+                    ...action.layovers
+                }
             };
         }
         case 'CHANGE_MOST_FILTER':
@@ -23,6 +36,16 @@ export function filtersReducer(
                 ...state,
                 cheapest: action.cheapest
             }
+        case 'TURN_ALL_LAYOVER_FILTERS_ON':
+            return {
+                ...state,
+                layovers: changeAllLayovers(state.layovers, true)
+            };
+        case 'TURN_ALL_LAYOVER_FILTERS_OFF':
+            return {
+                ...state,
+                layovers: changeAllLayovers(state.layovers, false)
+            };
         default:
             return state;
     }

@@ -13,3 +13,15 @@ export const changeLayoverFilter = function(layovers: LayoverFilter) {
         layovers
     };
 };
+
+export const turnAllLayoverFiltersOn = function() {
+    return {
+        type: 'TURN_ALL_LAYOVER_FILTERS_ON' as const
+    };
+};
+
+export const turnAllLayoverFiltersOff = function() {
+    return {
+        type: 'TURN_ALL_LAYOVER_FILTERS_OFF' as const
+    };
+};

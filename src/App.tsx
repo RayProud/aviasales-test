@@ -6,11 +6,20 @@ import Layovers from './components/layovers/layovers';
 import Tickets from './components/tickets/tickets';
 import Header from './components/header/header';
 
-const { startSearching, changeMostFilter } = actions;
+const {
+  startSearching,
+  changeMostFilter,
+  changeLayoverFilter,
+  turnAllLayoverFiltersOn,
+  turnAllLayoverFiltersOff
+} = actions;
 
 interface Props {
   startSearching: typeof startSearching;
   changeMostFilter: typeof changeMostFilter;
+  changeLayoverFilter: typeof changeLayoverFilter;
+  turnAllLayoverFiltersOn: typeof turnAllLayoverFiltersOn;
+  turnAllLayoverFiltersOff: typeof turnAllLayoverFiltersOff;
   tickets: AppState['tickets']['tickets'];
   filters: AppState['filters'];
 }
@@ -23,14 +32,27 @@ class App extends React.Component<Props> {
   }
 
   render() {
-    const { tickets, filters: {cheapest}, changeMostFilter } = this.props;
+    const {
+      tickets,
+      filters: {
+        cheapest,
+        layovers
+      },
+      changeMostFilter,
+      changeLayoverFilter,
+      turnAllLayoverFiltersOn,
+      turnAllLayoverFiltersOff
+    } = this.props;
 
     return (
       <div className="app">
         <Header />
-        <Layovers />
+        <Layovers filters={layovers} onChange={changeLayoverFilter} onSwitchOn={turnAllLayoverFiltersOn} onSwitchOff={turnAllLayoverFiltersOff} />
         {tickets && tickets.length > 0 &&
-          <Tickets tickets={tickets.slice(0, 10)} cheapest={cheapest} onSelect={changeMostFilter} />
+          <React.Fragment>
+            {/* <Layovers filters={layovers} /> */}
+            <Tickets tickets={tickets} cheapest={cheapest} onSelect={changeMostFilter} />
+          </React.Fragment>
         }
       </div>
     );
@@ -46,7 +68,10 @@ const mapStateToProps = (state: AppState) => {
 
 const mapDispatchToProps = {
   startSearching,
-  changeMostFilter
+  changeLayoverFilter,
+  changeMostFilter,
+  turnAllLayoverFiltersOn,
+  turnAllLayoverFiltersOff
 };
 
 export default connect(
