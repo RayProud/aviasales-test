@@ -33,7 +33,7 @@ function* getTickets() {
 
     while (true) {
         const payload = yield take(workerChannel);
-        console.log('payload', payload);
+
         const { tickets, layovers, stopSearch } = payload;
         if (tickets) yield put(ticketsResponseSuccess(tickets));
         if (layovers) yield put(changeLayoverFilter(layovers));

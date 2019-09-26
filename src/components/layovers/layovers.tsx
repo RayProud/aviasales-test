@@ -61,8 +61,8 @@ class Layovers extends React.PureComponent<Props> {
                         </li>
                         {
                             Object.keys(filters).map((filter, i) => {
-                                // 🤔 как-то неочевидно выходит деление на stops и all/0/1/2/3
-                                const stopsKeyword = filter.slice(5);
+                                // 🤔 как-то неочевидно выходит получение 0/1/2/3 от stopsN
+                                const stopsKeyword = filter[filter.length - 1];
 
                                 return (
                                     <li className="layovers__item" key={`${filter}-${i}`}>

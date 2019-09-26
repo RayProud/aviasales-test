@@ -48,8 +48,15 @@ const request = (url) => {
     return fetchWithErrors(url);
 };
 
-function filterLength(ticket, stops) {
-    return ticket.segments[0].stops.length === stops || ticket.segments[1].stops.length === stops;
+function filterLength(ticket, stops, both) {
+    const firstSegmentStopsEqual = ticket.segments[0].stops.length === stops;
+    const secondSegmentStopsEqual = ticket.segments[1].stops.length === stops;
+
+    if (both) {
+        return firstSegmentStopsEqual && secondSegmentStopsEqual;
+    }
+
+    return firstSegmentStopsEqual || secondSegmentStopsEqual;
 }
 
 function filterSort(tickets, filters) {
@@ -80,12 +87,23 @@ function filterSort(tickets, filters) {
 
     const allFiltersTrue = hasLayoversFilters && layoversValues.every(filter => filter === false);
     // если все пересадки, то больше фильтровать не надо
-    if (allFiltersTrue) {
+    // если пересадок вообще нет, то тоже отдаём
+    if (allFiltersTrue || !hasLayoversFilters) {
         return array;
     }
 
     // если есть конкретные пересадки, то здесь отфильтровать отсортированный массив
-    return array;
+    const filtersRules = Object.keys(layovers).reduce((prevState, key) => {
+        if (layovers[key]) {
+            prevState.push(+key[key.length - 1]);
+        }
+
+        return prevState;
+    }, []);
+
+    return array.filter(ticket => {
+        return filtersRules.some(stops => filterLength(ticket, stops, stops === 0));
+    });
 }
 
 function generateLayovers(layovers, sorted) {
@@ -106,7 +124,7 @@ async function startSearch(filters) {
     const searchResponse = await request(SEARCH_URL);
     const { searchId } = searchResponse;
 
-    // нет, в самом начале нет никакх фильтров, ключи должны появляться от индекса, но до 2
+    // в самом начале нет никаких фильтров, ведь мы ещё не знаем, какие билеты придут
     let layovers = {};
 
     while (haveTickets) {
@@ -122,7 +140,7 @@ async function startSearch(filters) {
             const sorted = filterSort(allSortedTickets, filters);
             layovers = generateLayovers(layovers, sorted);
             postMessage({
-                tickets: sorted.slice(0, 10),
+                tickets: sorted.slice(0, 5),
                 layovers
             });
         }
@@ -138,7 +156,7 @@ async function startSearch(filters) {
     allSortedTickets.sort((a, b) => a.price - b.price);
     layovers = generateLayovers(layovers, allSortedTickets);
     postMessage({
-        tickets: allSortedTickets.slice(0, 10),
+        tickets: allSortedTickets.slice(0, 5),
         layovers,
         stopSearch: true
     });
@@ -155,7 +173,7 @@ onmessage = async function(e) {
         this.console.log('sort');
         const sortedTickets = filterSort(allSortedTickets, filters);
         postMessage({
-            tickets: sortedTickets.slice(0, 10)
+            tickets: sortedTickets.slice(0, 5)
         });
     }
 }
