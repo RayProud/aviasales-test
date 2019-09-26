@@ -2,7 +2,8 @@ import { State, ActionsTypes } from './types';
 
 const initialState: State = {
     theme: 'white',
-    locale: 'ru-RU'
+    locale: 'ru-RU',
+    endSearch: false
 };
 
 export function systemReducer(
@@ -21,6 +22,11 @@ export function systemReducer(
                 ...state,
                 theme: action.theme
             };
+        case 'END_SEARCH':
+            return {
+                ...state,
+                endSearch: true
+            }
         default:
             return state;
     }

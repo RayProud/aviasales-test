@@ -5,6 +5,7 @@ import { AppState } from './redux/store';
 import Layovers from './components/layovers/layovers';
 import Tickets from './components/tickets/tickets';
 import Header from './components/header/header';
+import Plug from './components/plug/plug';
 
 const {
   startSearching,
@@ -22,6 +23,7 @@ interface Props {
   turnAllLayoverFiltersOff: typeof turnAllLayoverFiltersOff;
   tickets: AppState['tickets']['tickets'];
   filters: AppState['filters'];
+  system: AppState['system'];
 }
 
 class App extends React.Component<Props> {
@@ -38,6 +40,9 @@ class App extends React.Component<Props> {
         cheapest,
         layovers
       },
+      system: {
+        endSearch
+      },
       changeMostFilter,
       changeLayoverFilter,
       turnAllLayoverFiltersOn,
@@ -47,12 +52,14 @@ class App extends React.Component<Props> {
     return (
       <div className="app">
         <Header />
-        <Layovers filters={layovers} onChange={changeLayoverFilter} onSwitchOn={turnAllLayoverFiltersOn} onSwitchOff={turnAllLayoverFiltersOff} />
+        {Object.keys(layovers).length > 0 &&
+          <Layovers filters={layovers} onChange={changeLayoverFilter} onSwitchOn={turnAllLayoverFiltersOn} onSwitchOff={turnAllLayoverFiltersOff} />
+        }
+        {endSearch && tickets && tickets.length === 0 &&
+            <Plug />
+        }
         {tickets && tickets.length > 0 &&
-          <React.Fragment>
-            {/* <Layovers filters={layovers} /> */}
             <Tickets tickets={tickets} cheapest={cheapest} onSelect={changeMostFilter} />
-          </React.Fragment>
         }
       </div>
     );
@@ -62,7 +69,8 @@ class App extends React.Component<Props> {
 const mapStateToProps = (state: AppState) => {
   return {
     tickets: state.tickets.tickets,
-    filters: state.filters
+    filters: state.filters,
+    system: state.system
   };
 }
 

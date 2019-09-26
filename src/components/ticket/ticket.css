@@ -18,8 +18,7 @@
 
 .ticket__logo {
     width: 110px;
-    height: auto;
-    max-height: 36px;
+    height: 36px;
 }
 
 .ticket__details-heading {

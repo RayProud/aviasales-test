@@ -1,12 +1,7 @@
 import { State, ActionsTypes, LayoverFilter } from './types';
 
 const initialState: State = {
-    layovers: {
-        'stopsall': true,
-        'stops0': true,
-        'stops1': true,
-        'stops2': true
-    },
+    layovers: {},
     cheapest: true
 };
 

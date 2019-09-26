@@ -11,3 +11,9 @@ export const changeLocale = function(locale: string) {
         locale
     };
 };
+
+export const endSearch = function() {
+    return {
+        type: 'END_SEARCH' as const
+    };
+}

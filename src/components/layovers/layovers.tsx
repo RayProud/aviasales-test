@@ -12,14 +12,17 @@ interface Props {
 }
 
 class Layovers extends React.PureComponent<Props> {
+    onChangeAll = (event: React.ChangeEvent<HTMLInputElement>) => {
+        const { onSwitchOn, onSwitchOff } = this.props;
+        const value = event.target.checked;
+
+        return !!value ? onSwitchOn() : onSwitchOff();
+    }
+
     onChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-        const { onSwitchOn, onSwitchOff, onChange } = this.props;
+        const { onChange } = this.props;
         const value = event.target.checked;
         const id = event.target.id;
-
-        if (id === 'stopsall') {
-            return value ? onSwitchOn() : onSwitchOff();
-        }
 
         onChange({
             [id]: value
@@ -41,6 +44,7 @@ class Layovers extends React.PureComponent<Props> {
 
     render() {
         const { filters } = this.props;
+        const switchOnState = Object.values(filters).every(filter => filter === true);
 
         return (
             <aside className="layovers">
@@ -49,6 +53,12 @@ class Layovers extends React.PureComponent<Props> {
                         Количество пересадок
                     </h2>
                     <ul className="layovers__list">
+                        <li className="layovers__item">
+                            <input onChange={this.onChangeAll} checked={!!switchOnState} id='stopsall' type="checkbox" className="layovers__item-checkbox"/>
+                            <label htmlFor='stopsall' className="layovers__item-label">
+                                {this.getLayoverTitle('all')}
+                            </label>
+                        </li>
                         {
                             Object.keys(filters).map((filter, i) => {
                                 // 🤔 как-то неочевидно выходит деление на stops и all/0/1/2/3

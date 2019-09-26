@@ -4,9 +4,10 @@ import actions from './actionsCombine';
 import { StartSearching } from './tickets/types';
 import { AppState } from './store';
 
-const { ticketsResponseSuccess } = actions;
+const { ticketsResponseSuccess, changeLayoverFilter, endSearch } = actions;
 
 const getFilters = (state: AppState) => state.filters;
+const getSystem = (state: AppState) => state.system;
 
 const myWorker = new Worker("worker.js");
 
@@ -33,24 +34,27 @@ function* getTickets() {
     while (true) {
         const payload = yield take(workerChannel);
         console.log('payload', payload);
-        // payload.type === 'filters' - возможно, нужно сделать в редюсере ещё одну ветку, чтобы не перезатирать имеющиеся фильтры
-        // payload.type === 'tickets'
-        yield put(ticketsResponseSuccess(payload));
+        const { tickets, layovers, stopSearch } = payload;
+        if (tickets) yield put(ticketsResponseSuccess(tickets));
+        if (layovers) yield put(changeLayoverFilter(layovers));
+        if (stopSearch) yield put(endSearch());
     }
 }
 
 function* listenFiltersChange() {
     while (true) {
-        yield take(['CHANGE_MOST_FILTER', 'CHANGE_LAYOVER_FILTER']);
+        yield take(['CHANGE_MOST_FILTER', 'CHANGE_LAYOVER_FILTER', 'TURN_ALL_LAYOVER_FILTERS_ON', 'TURN_ALL_LAYOVER_FILTERS_OFF']);
+
+        const {endSearch} = yield select(getSystem);
         const filters = yield select(getFilters)
 
-        myWorker.postMessage({
+        // если поиск ещё не закончился, то пока ничего не шлём
+        endSearch && myWorker.postMessage({
             action: 'sort',
             filters
         });
     }
 }
-
 
 function* start() {
   while (true) {

@@ -54,23 +54,49 @@ function filterLength(ticket, stops) {
 
 function filterSort(tickets, filters) {
     const { cheapest, layovers } = filters;
+    const layoversValues = Object.values(layovers);
+    const hasLayoversFilters = Object.keys(layovers).length;
+
+    if (hasLayoversFilters) {
+        const allFiltersFalse = layoversValues.every(filter => filter === false);
+
+        if (allFiltersFalse) {
+            // когда все пересадки выключены, то таких билетов нет,
+            // покажем заглушку, мол, соре, у вас специфические вкусы
+            return [];
+        }
+    }
+
     // кажется, надо поменять как-то более явно держать это в сторе
     const fastest = !cheapest;
 
     const array = tickets.slice();
 
-    // если layovers['stopsall'], то фильтруем по most
-    // иначе сперва фильтруем по остановкам, потом уже по most (чтобы дофильтровать остатки предыдущей фильтрации)
-    if (layovers['stopsall']) {
-        if (cheapest) array.sort((a, b) => a.price - b.price);
-        if (fastest) array.sort((a, b) => (a.segments[0].duration + a.segments[1].duration) - (b.segments[0].duration + b.segments[1].duration));
+    if (cheapest) {
+        array.sort((a, b) => a.price - b.price);
+    } else if (fastest) {
+        array.sort((a, b) => (a.segments[0].duration + a.segments[1].duration) - (b.segments[0].duration + b.segments[1].duration));
+    }
 
+    const allFiltersTrue = hasLayoversFilters && layoversValues.every(filter => filter === false);
+    // если все пересадки, то больше фильтровать не надо
+    if (allFiltersTrue) {
         return array;
     }
 
-    if (layovers['stopsall']) return array;
-    // не больше трёх пересадок в фильтрах согласно дизайну и сайту (и здравому смыслу?)
-    // как-то фильтровать по пришедшим пересадкам
+    // если есть конкретные пересадки, то здесь отфильтровать отсортированный массив
+    return array;
+}
+
+function generateLayovers(layovers, sorted) {
+    return Array(3).fill().reduce((prevState, _, index) => {
+        if (prevState[`stops${index}`]) return layovers;
+
+        return {
+            ...prevState,
+            [`stops${index}`]: sorted.some(ticket => filterLength(ticket, index)),
+        };
+    }, layovers);
 }
 
 async function startSearch(filters) {
@@ -79,6 +105,9 @@ async function startSearch(filters) {
     // обложиться try-catch
     const searchResponse = await request(SEARCH_URL);
     const { searchId } = searchResponse;
+
+    // нет, в самом начале нет никакх фильтров, ключи должны появляться от индекса, но до 2
+    let layovers = {};
 
     while (haveTickets) {
         const ticketsResponse = await request(`${TICKETS_URL}?searchId=${searchId}`);
@@ -91,8 +120,13 @@ async function startSearch(filters) {
         // (правда, количество при этом растёт и каждая следующая сортировка будет занимать больше времени)
         if (count === 0 || count % 10 === 0) {
             const sorted = filterSort(allSortedTickets, filters);
-            postMessage(sorted.slice(0, 10));
+            layovers = generateLayovers(layovers, sorted);
+            postMessage({
+                tickets: sorted.slice(0, 10),
+                layovers
+            });
         }
+
         count++;
 
         if (stop) {
@@ -101,11 +135,13 @@ async function startSearch(filters) {
     }
 
     // sort() мутирует
-    const sortedTickets = allSortedTickets.sort((a, b) => a.price - b.price);
-    postMessage(sortedTickets.slice(0, 10));
-
-    // вот тут бы ещё высылать данные о том, какие пересадки вообще доступны
-    // исползовать [].some()?
+    allSortedTickets.sort((a, b) => a.price - b.price);
+    layovers = generateLayovers(layovers, allSortedTickets);
+    postMessage({
+        tickets: allSortedTickets.slice(0, 10),
+        layovers,
+        stopSearch: true
+    });
 }
 
 onmessage = async function(e) {
@@ -116,8 +152,10 @@ onmessage = async function(e) {
     }
 
     if (action === 'sort' && allSortedTickets.length) {
+        this.console.log('sort');
         const sortedTickets = filterSort(allSortedTickets, filters);
-        postMessage(sortedTickets.slice(0, 10));
+        postMessage({
+            tickets: sortedTickets.slice(0, 10)
+        });
     }
-
 }
