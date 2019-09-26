@@ -1,5 +1,6 @@
 "use strict";
 
+const LAYOVERS_FILTERS_COUNT = 3;
 const TICKETS_URL = 'https://front-test.beta.aviasales.ru/tickets';
 const SEARCH_URL = 'https://front-test.beta.aviasales.ru/search';
 const allSortedTickets = [];
@@ -18,9 +19,16 @@ async function checkStatus(response) {
     const error = new Error(`url: ${url}, status: ${status}, statusText: ${statusText}`);
     throw error;
 }
+
+/**
+ * Fetch принимает ответ в формате Response — https://developer.mozilla.org/en-US/docs/Web/API/Response
+ * Поэтому для дальнейшего использования нужно тело перевести в формат объекта
+ * @param response Response
+ */
 function parseJSON(response) {
     return response.json();
 }
+
 /**
  * В стандарте fetch не предусмотрен таймаут запроса, эмулируем его через race-condition
  * @param request исполняемый запрос
@@ -36,6 +44,11 @@ function fetchTimeout(url, request, timeout = 1000) {
     ]);
 }
 
+/**
+ * Fetch не умеет сам перезапрашивать перезапрашивать, поэтому пишем обёртку, где сами смотрим
+ * что для нас ошибка и сколько раз перезапрашивать
+ * @param url
+ */
 const request = (url) => {
     function fetchWithErrors(url, repeats = 5) {
         let retries = repeats;
@@ -118,7 +131,9 @@ function filterSort(tickets, filters) {
 }
 
 function generateLayovers(layovers, sorted) {
-    return Array(3).fill().reduce((prevState, _, index) => {
+    // Вот тут конечно надо количество фильтров выносить в константу на уровне приложения
+    // Но времени лезть в eject CRA, чтобы собирать воркер отдельной точкой входа, поэтому вот так
+    return Array(LAYOVERS_FILTERS_COUNT).fill().reduce((prevState, _, index) => {
         if (prevState[`stops${index}`]) return layovers;
 
         return {

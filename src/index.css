@@ -19,6 +19,7 @@ body {
 }
 
 .app {
+  box-sizing: border-box;
   display: grid;
   margin: 0 auto;
   padding: 0 0 20px;
@@ -42,4 +43,17 @@ body {
 
 .tickets {
   grid-area: tickets-wrap;
+}
+
+@media screen and (max-width: 754px) {
+  .app {
+    padding: 0 10px;
+    width: 100%;
+    grid-template-areas: "header"
+                       "layovers"
+                       "tickets-wrap";
+    grid-template-rows: 160px minmax(min-content, max-content) minmax(min-content, max-content);
+    grid-template-columns: 1fr;
+    grid-gap: 20px;
+  }
 }
