@@ -4,7 +4,7 @@ import actions from './actionsCombine';
 import { StartSearching } from './tickets/types';
 import { AppState } from './store';
 
-const { ticketsResponseSuccess, changeLayoverFilter, endSearch } = actions;
+const { ticketsResponseSuccess, changeLayoverFilter, endSearch, hasError } = actions;
 
 const getFilters = (state: AppState) => state.filters;
 const getSystem = (state: AppState) => state.system;
@@ -34,10 +34,12 @@ function* getTickets() {
     while (true) {
         const payload = yield take(workerChannel);
 
-        const { tickets, layovers, stopSearch } = payload;
+        const { tickets, layovers, stopSearch, error } = payload;
+
         if (tickets) yield put(ticketsResponseSuccess(tickets));
         if (layovers) yield put(changeLayoverFilter(layovers));
         if (stopSearch) yield put(endSearch());
+        if (error) yield put(hasError());
     }
 }
 
@@ -59,17 +61,12 @@ function* listenFiltersChange() {
 function* start() {
   while (true) {
     yield take<StartSearching>('START_SEARCHING');
+    const filters = yield select(getFilters)
 
-    try {
-        const filters = yield select(getFilters)
-
-        myWorker.postMessage({
-            action: 'getTickets',
-            filters
-        });
-    } catch(e) {
-        console.log('try error', e);
-    }
+    myWorker.postMessage({
+        action: 'getTickets',
+        filters
+    });
   }
 }
 

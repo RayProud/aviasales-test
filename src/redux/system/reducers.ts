@@ -3,7 +3,8 @@ import { State, ActionsTypes } from './types';
 const initialState: State = {
     theme: 'white',
     locale: 'ru-RU',
-    endSearch: false
+    endSearch: false,
+    hasError: false
 };
 
 export function systemReducer(
@@ -26,6 +27,11 @@ export function systemReducer(
             return {
                 ...state,
                 endSearch: true
+            }
+        case 'HAS_ERROR':
+            return {
+                ...state,
+                hasError: true
             }
         default:
             return state;

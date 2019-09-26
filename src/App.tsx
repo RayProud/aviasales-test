@@ -6,6 +6,7 @@ import Layovers from './components/layovers/layovers';
 import Tickets from './components/tickets/tickets';
 import Header from './components/header/header';
 import Plug from './components/plug/plug';
+import Error from './components/error/error';
 
 const {
   startSearching,
@@ -41,7 +42,8 @@ class App extends React.Component<Props> {
         layovers
       },
       system: {
-        endSearch
+        endSearch,
+        hasError
       },
       changeMostFilter,
       changeLayoverFilter,
@@ -52,6 +54,7 @@ class App extends React.Component<Props> {
     return (
       <div className="app">
         <Header />
+        {hasError && <Error />}
         {Object.keys(layovers).length > 0 &&
           <Layovers filters={layovers} onChange={changeLayoverFilter} onSwitchOn={turnAllLayoverFiltersOn} onSwitchOff={turnAllLayoverFiltersOff} />
         }
