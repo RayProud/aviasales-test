@@ -1,44 +1,58 @@
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+# Тестовое задание Aviasales
 
-## Available Scripts
+## TL;DR
+- [aviasales.rayproud.now.sh](https://aviasales.rayproud.now.sh/);
+- Сделано на базе [Create React App](https://github.com/facebook/create-react-app);
+- TypeScript, React, Redux, Redux-Saga, Web Workers, Grid Layout.
 
-In the project directory, you can run:
+## Поднять у себя
+1. `git clone git@github.com:RayProud/aviasales-test.git`
+2. `cd aviasales-test`
+3. `npm i`
+4. `npm start`
+5. (если само не) Открыть в браузере `localhost:3000`
 
+## Что умеет приложение
+Задание сделано по [следующей доке](https://github.com/KosyanMedia/test-tasks/tree/master/aviasales_frontend), а работа с сервером по [этой доке](https://github.com/KosyanMedia/test-tasks/blob/master/aviasales_frontend/server.md).
+
+При загрузки приложения, веб воркер запрашивает парвую пачку билетов, сортирует её по стоимости билетов (считаю, что это единственный фильтр по умолчанию) и проходится по ним, чтобы понять, какие виды пересадок есть. Эту первую партию билетов вместе с фильтрами воркер отдаёт приложению на отрисовку, чтобы пользователь уже мог на что-то посмотреть.
+
+После этого запросы и сортировка продолжаются и на каждую 10ю пачку запросов воркер отправляет в приложение новые ТОП-5 билетов, пока не сервер не скажет, что билеты не закончились. Только после этого начинают работать фильтры по пересадкам. Что, теоретически, может привести к введению пользователя в заблуждение, если он доберется до фильтров быстрее, чем закончится поиск. Но эту проблему я решить не успел, только придумал несколько решений.
+Варианты решения проблемы:
+- Блокировать прелоадером фильтры (что не очень хороший UX), 
+- Написать очередь сообщений в воркере, чтобы он отфильтровал после того, как закончит с поиском (но для этого придётся ставить прелоадер на фильтры после клика, чтобы запретить в эту очередь допушивать),
+- Может использовать [SharedWorker](https://developer.mozilla.org/en-US/docs/Web/API/SharedWorker), чтобы пока один заканчивает поиск, второй мог бы фильтровать по тем билетам, что уже есть.
+
+Каждый запрос (на пачку билетов) ограничен таймаутом в две секунды и пятью запросами. Если запрос падает больше пяти раз, то воркер пошлёт сообщение об ошибке и в интерфейсе появится загрушка, говорящая о проблеме. 
+
+Если все фильтры пересадок были выключены, то показывается плашка с сообщением, что без фильтров непонятно, что именно искать.
+
+Также, у приложения есть простенькая мобильная версия с просто переставленными блоками в одну колонку.
+
+## Про техническую часть
+В качестве бойлерплейта был взят Create React App, для того, чтобы не тратить время на сетап всего окружения. Для меня важно было, что там уже есть поджержка TS, React, Webpack и минимум post-css.
+Для работы с сайд-эффектами была взята [Redux-Saga](https://redux-saga.js.org). Выбрана она была не только потому что там, на мой взгляд, удобно можно описывать бизнес-логику в одной функции-генераторе, но ещё и потому что там [eventChannel](https://redux-saga.js.org/docs/advanced/Channels.html), позволяющий связать сообщения от чего-то вне реакта/редакса (в моём случае с Web Worker'ом) со стором.
+Чтобы не блокировать основной поток JavaScript'а постоянными запросами и сортировкой потенциально больших данных, было решено всю работу с данными вынести в [Web Worker](https://developer.mozilla.org/en-US/docs/Web/API/Web_Workers_API/Using_web_workers). Именно там делаются все запросы, сортируются по фильтрам (по тем, что есть) и через `postMessage` отправляются в основной поток, где его ловит подписанная на эти сообщения сага.
+Для запросов используется `fetch`, который обвешан проверками кодов статусов, починкой некоторых неприятных багов, ретраями и отключением по таймауту.
+
+## Тонкий момент
+Выбирая CRA, я помнил, что в нём умеют работать с Service Worker, что заставило меня думать, что и Web Worker'ы они готовить умеют. Потрятя какое-то неприятное количество времени на то, чтобы узнать, что поддержка их будет в следующем минорном релизе react-scripts, а так же, что костылей написано уже почти с десяток, но только ни один из них не может в TS, было решено, что `npm run eject` (чтобы вынести все файлы настроек из `react-scripts` в репу проекта) я делать не буду и просто положил его голым JavaScript'ом в public/. Поэтому там без типизации, сборка про этот файл ничего не знает и в идеале бы это поправить. Сам файл можно посмотреть в [public/worker.js](https://github.com/RayProud/aviasales-test/blob/master/public/worker.js).
+
+## Что хотелось бы, но не сделано
+- [ ]  Тесты;
+- [ ]  Прелоадер в самом начале, когда, теоретически, долго может не появляться партия билетов;
+- [ ]  Прелоадер-полоса, чтобы показать, что процесс допушивания/досортировывания билетов ещё идёт;
+- [ ]  Сообщение о том, что поиск устарел и нужно перезапросить данные;
+- [ ]  Указывать `+N дней`, если прилёт не в тот же день, когда вылет;
+- [ ]  Собирать `worker.js` тайпскриптом в отдельный файл;
+- [ ]  Prettier, который бы всё причесал.
+
+## Команды
 ### `npm start`
-
-Runs the app in the development mode.<br>
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
-
-The page will reload if you make edits.<br>
-You will also see any lint errors in the console.
-
-### `npm test`
-
-Launches the test runner in the interactive watch mode.<br>
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+Чтобы поднять приложение на `localhost:3000`
 
 ### `npm run build`
-
-Builds the app for production to the `build` folder.<br>
-It correctly bundles React in production mode and optimizes the build for the best performance.
-
-The build is minified and the filenames include the hashes.<br>
-Your app is ready to be deployed!
-
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+Чтобы сбилдить про-версию приложения
 
 ### `npm run eject`
-
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
-
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
-
-Instead, it will copy all the configuration files and the transitive dependencies (Webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
-
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
+Чтобы вытащить все скрипты сборки из `react-scripts` в сам репозиторий
