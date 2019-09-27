@@ -147,7 +147,6 @@ async function startSearch(filters) {
     try {
         let haveTickets = true;
         let count = 0;
-        // обложиться try-catch
         const searchResponse = await request(SEARCH_URL);
         const { searchId } = searchResponse;
 
@@ -179,7 +178,7 @@ async function startSearch(filters) {
             }
         }
 
-        // sort() мутирует
+        // sort() мутирует, это нужно помнить, но я не придумал, почему здесь это плохо
         allSortedTickets.sort((a, b) => a.price - b.price);
         layovers = generateLayovers(layovers, allSortedTickets);
         postMessage({

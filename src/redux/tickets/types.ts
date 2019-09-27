@@ -1,7 +1,7 @@
 import { startSearching, ticketsResponseSuccess } from './actions';
 
 export interface State {
-    tickets?: Ticket[]
+    topFiveTickets?: Ticket[]
 }
 
 export type StartSearching = ReturnType<typeof startSearching>;

@@ -22,7 +22,7 @@ interface Props {
   changeLayoverFilter: typeof changeLayoverFilter;
   turnAllLayoverFiltersOn: typeof turnAllLayoverFiltersOn;
   turnAllLayoverFiltersOff: typeof turnAllLayoverFiltersOff;
-  tickets: AppState['tickets']['tickets'];
+  tickets: AppState['tickets']['topFiveTickets'];
   filters: AppState['filters'];
   system: AppState['system'];
 }
@@ -71,7 +71,7 @@ class App extends React.Component<Props> {
 
 const mapStateToProps = (state: AppState) => {
   return {
-    tickets: state.tickets.tickets,
+    tickets: state.tickets.topFiveTickets,
     filters: state.filters,
     system: state.system
   };

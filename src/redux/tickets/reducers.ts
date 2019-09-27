@@ -10,7 +10,7 @@ export function ticketsReducer(
         case 'PUT_TICKETS':
             return {
                 ...state,
-                tickets: action.tickets
+                topFiveTickets: action.tickets
             };
         default: {
             return state;
