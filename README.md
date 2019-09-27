@@ -3,7 +3,8 @@
 ## TL;DR
 - [aviasales.rayproud.now.sh](https://aviasales.rayproud.now.sh/);
 - Сделано на базе [Create React App](https://github.com/facebook/create-react-app);
-- TypeScript, React, Redux, Redux-Saga, Web Workers, Grid Layout.
+- TypeScript, React, Redux, Redux-Saga, Web Workers, Grid Layout;
+- Времени потрачено примерно пять вечеров.
 
 ## Поднять у себя
 1. `git clone git@github.com:RayProud/aviasales-test.git`
