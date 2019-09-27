@@ -1,5 +1,3 @@
-import { func } from "prop-types";
-
 export const changeTheme = function(theme: string) {
     return {
         type: 'CHANGE_THEME' as const,
